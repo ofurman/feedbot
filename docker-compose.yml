@@ -7,13 +7,13 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/nginx.conf:/config/nginx/site-confs/default
+      - ./nginx/bot.conf:/config/nginx/site-confs/default
     container_name: nginx
     environment:
       - PUID=1003 # get on dockerhost through command "id <user>""
       - PGID=1004
       - EMAIL=zalupa.ogromnaya@gmail.com
-      - URL=35.225.146.14.sslip.io
+      - URL=104.198.255.120.sslip.io
       - SUBDOMAINS=www
       - TZ=Europe/London
       - VALIDATION=http # using dns validation
@@ -27,10 +27,10 @@ services:
       - 5001:5001
   # links:
   #   - db
-   environment:
+    environment:
      TG_API_KEY: "git clone https://github.com/tmux/tmux.git"  # API key of the bot
      URL_PATH: "/feedbot"
-     URL_HOSTNAME: "https://35.225.146.14.sslip.io"
+     URL_HOSTNAME: "https://104.198.255.120.sslip.io"
   #   HEALTHCHECK_URL: "/test"
   # depends_on:
   #   - db
