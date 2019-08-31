@@ -27,10 +27,10 @@ services:
       - 5001:5001
   # links:
   #   - db
-  # environment:
-  #   TG_API_KEY:  # API key of the bot
-  #   URL_PATH:
-  #   URL_HOSTNAME:
+   environment:
+     TG_API_KEY: "git clone https://github.com/tmux/tmux.git"  # API key of the bot
+     URL_PATH: "/feedbot"
+     URL_HOSTNAME: "https://35.225.146.14.sslip.io"
   #   HEALTHCHECK_URL: "/test"
   # depends_on:
   #   - db

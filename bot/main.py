@@ -1,4 +1,5 @@
 import logging
+import os
 
 from aiogram import Bot, types
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
@@ -7,11 +8,11 @@ from aiogram.dispatcher.webhook import SendMessage
 from aiogram.utils.executor import start_webhook
 
 
-API_TOKEN = 'BOT_TOKEN_HERE'
+API_TOKEN = os.environ.get('TG_API_KEY')
 
 # webhook settings
-WEBHOOK_HOST = 'https://35.225.146.14.sslip.io'
-WEBHOOK_PATH = '/feedbot'
+WEBHOOK_HOST = os.environ.get('URL_HOSTNAME')
+WEBHOOK_PATH = os.environ.get('URL_PATH')
 WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
 
 # webserver settings
