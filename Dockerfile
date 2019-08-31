@@ -3,7 +3,7 @@ FROM python:3.7-alpine
 LABEL Name=feedbot Version=0.0.1
 EXPOSE 5001
 
-RUN apk update && apk upgrade -y
+RUN apk update && apk upgrade
 RUN apk add --no-cache build-base
 
 RUN mkdir /usr/src/app
