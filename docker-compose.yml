@@ -1,0 +1,36 @@
+version: '3.6'
+services:
+  
+  nginx:
+    image: linuxserver/letsencrypt
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/config/nginx/site-confs/default
+    container_name: nginx
+    environment:
+      - PUID=1003 # get on dockerhost through command "id <user>""
+      - PGID=1004
+      - EMAIL=zalupa.ogromnaya@gmail.com
+      - URL=35.225.146.14.sslip.io
+      - SUBDOMAINS=www
+      - TZ=Europe/London
+      - VALIDATION=http # using dns validation
+      # - DNSPLUGIN=dnsimple # via dnsimple, note there is additional configuration require separate from this file
+      - STAGING=true # this should be uncommented when testing for initial success, to avoid some rate limiting
+
+  feedbot:
+    image: bitbot
+    build: .
+    ports:
+      - 5001:5001
+  # links:
+  #   - db
+  # environment:
+  #   TG_API_KEY:  # API key of the bot
+  #   URL_PATH:
+  #   URL_HOSTNAME:
+  #   HEALTHCHECK_URL: "/test"
+  # depends_on:
+  #   - db
