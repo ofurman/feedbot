@@ -9,6 +9,7 @@ from aiogram.utils.executor import start_webhook
 
 
 API_TOKEN = os.environ.get('TG_API_KEY')
+print(API_TOKEN)
 
 # webhook settings
 WEBHOOK_HOST = os.environ.get('URL_HOSTNAME')

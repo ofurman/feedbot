@@ -28,7 +28,7 @@ services:
   # links:
   #   - db
     environment:
-     TG_API_KEY: "git clone https://github.com/tmux/tmux.git"  # API key of the bot
+     TG_API_KEY: "685674320:AAEJ1uw41szOnbr1AmTVY0bf8nicjctFQSI"  # API key of the bot
      URL_PATH: "/feedbot"
      URL_HOSTNAME: "https://104.198.255.120.sslip.io"
   #   HEALTHCHECK_URL: "/test"
