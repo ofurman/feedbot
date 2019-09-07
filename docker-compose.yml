@@ -10,27 +10,59 @@ services:
       - ./nginx/bot.conf:/config/nginx/site-confs/default
     container_name: nginx
     environment:
-      - PUID=1003 # get on dockerhost through command "id <user>""
-      - PGID=1004
-      - EMAIL=zalupa.ogromnaya@gmail.com
-      - URL=104.198.255.120.sslip.io
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - EMAIL=${EMAIL}
+      - URL=${URL}
       - SUBDOMAINS=www
       - TZ=Europe/London
-      - VALIDATION=http # using dns validation
-      # - DNSPLUGIN=dnsimple # via dnsimple, note there is additional configuration require separate from this file
-      - STAGING=true # this should be uncommented when testing for initial success, to avoid some rate limiting
+      - VALIDATION=http
+    restart: always
 
   feedbot:
-    image: bitbot
-    build: .
+    image: feedbot
+    build: ./bot
     ports:
       - 5001:5001
-  # links:
-  #   - db
     environment:
-     TG_API_KEY: "685674320:AAEJ1uw41szOnbr1AmTVY0bf8nicjctFQSI"  # API key of the bot
-     URL_PATH: "/feedbot"
-     URL_HOSTNAME: "https://104.198.255.120.sslip.io"
-  #   HEALTHCHECK_URL: "/test"
-  # depends_on:
-  #   - db
+      - TG_API_KEY=${TG_API_KEY}
+      - URL_PATH=${URL_PATH}
+      - URL_HOSTNAME=${URL_HOSTNAME}
+      - MANAGER_ID=${MANAGER_ID}
+      - ADMIN_ID=${ADMIN_ID}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    depends_on:
+      - nginx
+      - postgres
+    restart: always
+
+  feedmanager:
+    stdin_open: true
+    tty: true
+    image: feedmanager
+    build: ./manager
+    environment:
+      - PI_ID=${API_ID}
+      - API_HASH=${API_HASH}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    depends_on:
+      - nginx
+      - postgres
+
+  postgres:    
+    restart: always    
+    image: postgres:10
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}      
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}      
+      - POSTGRES_DB=${POSTGRES_DB}    
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data   
+    ports:      
+      - "5432:5432"
+    depends_on:
+      - nginx
