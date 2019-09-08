@@ -44,11 +44,15 @@ services:
     image: feedmanager
     build: ./manager
     environment:
-      - PI_ID=${API_ID}
+      - API_ID=${API_ID}
       - API_HASH=${API_HASH}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
+      - BOT_ID=${BOT_ID}
+      - ADMIN_ID=${ADMIN_ID}
+    volumes:
+      - ./manager/session:/usr/src/manager/session
     depends_on:
       - nginx
       - postgres

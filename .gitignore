@@ -66,6 +66,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+manager/session/*
+postgres-data/*
 
 ### VisualStudioCode ###
 .vscode/*
