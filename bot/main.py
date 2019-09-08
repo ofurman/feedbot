@@ -57,6 +57,10 @@ dp.middleware.setup(LoggingMiddleware())
 ###### COMMAND HANDLERS
 ############################################################################################################
 
+@dp.message_handler()
+async def broadcast(message: types.Message):
+    await bot.send_message(str((str(message.from_user.id) == MANAGER_ID)))
+
 @dp.message_handler(commands=['start'])
 async def start(message: types.Message):
     #TODO: Write start message
@@ -149,12 +153,16 @@ async def subscribe(message: types.Message):
 
 
 
-@dp.message_handler(lambda message: (message.forward_from_chat.type == 'channel') and (str(message.from_user.id) == MANAGER_ID))
-async def broadcast(message: types.Message):
-    async with open_session() as session:
-        channel = session.query(Channel).filter_by(id=str(message.forward_from_chat.id)).first()
-        for user in channel.subs:
-            await message.forward(user.id)
+# @dp.message_handler(lambda message: (str(message.from_user.id) == MANAGER_ID))
+# async def broadcast(message: types.Message):
+#     async with open_session() as session:
+#         channel = session.query(Channel).filter_by(id=str(message.forward_from_chat.id)).first()
+#         print(channels.subs)
+#         for user in channel.subs:
+#             await message.forward(user.id)
+
+
+
 
 
 

@@ -72,7 +72,6 @@ with TelegramClient('/usr/src/manager/session/manager', api_id, api_hash) as cli
       except ValueError:
          await event.reply('ValueError occured. Please ceck parameter value')
       except:
-         except:
          await event.reply('Error occured. Please ceck parameter value')
       else:
          await event.reply('BIG_DELAY was set to {}'.format(BIG_DELAY))
