@@ -15,6 +15,10 @@ from aiogram.dispatcher import Dispatcher
 from aiogram.dispatcher.webhook import SendMessage
 from aiogram.utils.executor import start_webhook
 
+#FSM IMPORT
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram.dispatcher import FSMContext
+
 
 API_TOKEN = os.environ.get('TG_API_KEY')
 MANAGER_ID = os.environ.get('MANAGER_ID')
@@ -49,6 +53,10 @@ bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot)
 dp.middleware.setup(LoggingMiddleware())
 
+############################################################################################################
+###### COMMAND HANDLERS
+############################################################################################################
+
 @dp.message_handler(commands=['start'])
 async def start(message: types.Message):
     #TODO: Write start message
@@ -76,7 +84,50 @@ async def list_my_channels(message: types.Message):
 @dp.message_handler(commands=['help'])
 async def help(message: types.Message):
     #TODO: Write help message
-    return SendMessage(message.chat.id, message.text)
+    reply_msg = 'HELP MESSAGE'
+    bot.send_message(message.chat.id, reply_msg)
+
+@dp.message_handler(commands=['unsubscribe'])
+async def unsubscribe(message: types.Message):
+    async with open_session() as session:
+        user = session.query(User).filter_by(id=message.from_user.id).first()
+        if user is None:
+            user = User(id=message.from_user.id, username=message.from_user.username, 
+                                language_code=message.from_user.language_code)
+            session.add(user)
+
+        for channel in user.channels:
+            inline_kb = types.InlineKeyboardMarkup(row_width=1)
+            button = types.InlineKeyboardButton('❌ Отписаться', callback_data='unsubscribe{}'.format(channel.id))
+            inline_kb.insert(button)
+            await bot.send_message(message.chat.id, channel.title, reply_markup=inline_kb)
+        
+
+@dp.callback_query_handler(lambda c: 'unsubscribe' in c.data)
+async def process_unsubscribe_button(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id)
+    async with open_session() as session:
+        channel_id = callback_query.data.strip('unsubscribe')
+
+        user = session.query(User).filter_by(id=callback_query.from_user.id).first()
+        if user is None:
+            user = User(id=callback_query.from_user.id, username=callback_query.from_user.username, 
+                                language_code=callback_query.from_user.language_code)
+            session.add(user)
+        try:
+            channel = session.query(Channel).filter_by(id=channel_id).first()
+            user.channels.remove(channel)
+        except:
+            reply_msg = '🆘Усп, произошла ошибка.\nВы не подписаны на этот канал 😟\n\nЕсли функционал работает неправильно, напишите @lesha_f'
+            await bot.send_message(callback_query.from_user.id, reply_msg)
+        else:
+            reply_msg = '✅Вы успешно отписались от {}'.format(channel.title)
+            await bot.send_message(callback_query.from_user.id, reply_msg)
+
+
+############################################################################################################
+###### END COMMAND HANDLERS
+############################################################################################################
 
 @dp.message_handler(lambda message: (message.forward_from_chat.type == 'channel') and (str(message.from_user.id) != MANAGER_ID))
 async def subscribe(message: types.Message):
