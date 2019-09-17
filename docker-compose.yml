@@ -33,6 +33,11 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
+      - BOT_ID=${BOT_ID}
+      - API_ID=${API_ID}
+      - API_HASH=${API_HASH}
+    volumes:
+      - ./bot/session:/usr/src/manager/session
     depends_on:
       - nginx
       - postgres

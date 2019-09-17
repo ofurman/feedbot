@@ -1,10 +1,10 @@
 #DATABASE
-from config import Config
+import config
 
-from db import Session, Base, engine
+import db
+from db import open_session
 from db.models import User, Channel
-
-from contextlib import asynccontextmanager
+import db.events
 
 import logging
 import os
@@ -19,24 +19,12 @@ from aiogram.utils.executor import start_webhook
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
 
+from config import manager_client as client
+
 
 API_TOKEN = os.environ.get('TG_API_KEY')
 MANAGER_ID = os.environ.get('MANAGER_ID')
 ADMIN_ID = os.environ.get('ADMIN_ID')
-
-#Load database
-Base.metadata.create_all(engine)
-
-@asynccontextmanager
-async def open_session():
-    session = Session()
-    try:
-        yield session
-    except:
-        session.rollback()
-        raise
-    else:
-        session.commit()
 
 # webhook settings
 WEBHOOK_HOST = os.environ.get('URL_HOSTNAME')
@@ -56,10 +44,6 @@ dp.middleware.setup(LoggingMiddleware())
 ############################################################################################################
 ###### COMMAND HANDLERS
 ############################################################################################################
-
-@dp.message_handler()
-async def broadcast(message: types.Message):
-    await bot.send_message(str((str(message.from_user.id) == MANAGER_ID)))
 
 @dp.message_handler(commands=['start'])
 async def start(message: types.Message):
@@ -121,8 +105,10 @@ async def process_unsubscribe_button(callback_query: types.CallbackQuery):
         try:
             channel = session.query(Channel).filter_by(id=channel_id).first()
             user.channels.remove(channel)
-        except:
-            reply_msg = '🆘Усп, произошла ошибка.\nВы не подписаны на этот канал 😟\n\nЕсли функционал работает неправильно, напишите @lesha_f'
+            print(channel.subs, flush=True)
+            session.delete(channel)
+        except Exception as e:
+            reply_msg = f'🆘Усп, произошла ошибка.\nВы не подписаны на этот канал 😟\n\nЕсли функционал работает неправильно, напишите @lesha_f\n{e}'
             await bot.send_message(callback_query.from_user.id, reply_msg)
         else:
             reply_msg = '✅Вы успешно отписались от {}'.format(channel.title)
@@ -189,12 +175,13 @@ async def on_shutdown(dp):
 
 
 if __name__ == '__main__':
-    start_webhook(
-        dispatcher=dp,
-        webhook_path=WEBHOOK_PATH,
-        on_startup=on_startup,
-        on_shutdown=on_shutdown,
-        skip_updates=True,
-        host=WEBAPP_HOST,
-        port=WEBAPP_PORT,
-    )
+    with client:
+        start_webhook(
+            dispatcher=dp,
+            webhook_path=WEBHOOK_PATH,
+            on_startup=on_startup,
+            on_shutdown=on_shutdown,
+            skip_updates=True,
+            host=WEBAPP_HOST,
+            port=WEBAPP_PORT,
+        )
